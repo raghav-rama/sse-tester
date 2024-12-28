@@ -62,7 +62,10 @@
 <form on:submit|preventDefault={handleSubmit} class="card">
 	<div>
 		<label for="url">Endpoint URL:</label>
-		<input type="text" id="url" bind:value={url} placeholder="Enter your SSE endpoint URL" />
+		<div class="input-group">
+			<span class="method-tag">POST</span>
+			<input type="text" id="url" bind:value={url} placeholder="Enter your SSE endpoint URL" />
+		</div>
 	</div>
 
 	<div>
@@ -70,7 +73,7 @@
 		<textarea id="body" bind:value={body} rows="10"></textarea>
 	</div>
 
-	<button type="submit"> Send Request </button>
+	<button type="submit">Send Request</button>
 </form>
 
 <article class="card prose">

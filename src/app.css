@@ -14,6 +14,30 @@ body {
 }
 
 /* Form elements */
+.input-group {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 1rem;
+}
+
+.method-tag {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    background-color: #374151;
+    border: 1px solid #4b5563;
+    border-right: none;
+    border-radius: 0.5rem 0 0 0.5rem;
+    color: #e100ff;
+    font-family: monospace;
+    font-weight: 800;
+}
+
+.input-group input {
+    margin-bottom: 0;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
 input, textarea {
     width: 100%;
     padding: 0.75rem;

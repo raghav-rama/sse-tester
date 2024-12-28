@@ -3,6 +3,8 @@
 	import { marked } from 'marked';
 
 	const renderedHTML = writable('');
+	const errorMessage = writable('');
+	let isLoading = false;
 	let url = 'http://localhost:8000/api/v1/chat/completions';
 	let body = JSON.stringify(
 		{
@@ -16,45 +18,67 @@
 	);
 
 	async function handleSubmit() {
-		const response = await fetch(url, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				Accept: 'text/event-stream'
-			},
-			body
-		});
+		try {
+			isLoading = true;
+			errorMessage.set('');
+			renderedHTML.set('');
 
-		const reader = response.body?.getReader();
-		if (!reader) {
-			console.error('No reader found');
-			return;
-		}
-		const decoder = new TextDecoder();
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+					Accept: 'text/event-stream'
+				},
+				body
+			});
 
-		let accumulatedText = '';
+			if (!response.ok) {
+				throw new Error(`HTTP error! status: ${response.status}`);
+			}
 
-		while (true) {
-			const { value, done } = await reader.read();
-			if (done) break;
+			const reader = response.body?.getReader();
+			if (!reader) {
+				throw new Error('Server response was empty');
+			}
 
-			const chunk = decoder.decode(value, { stream: true });
-			const lines = chunk.split('\n');
+			const decoder = new TextDecoder();
+			let accumulatedText = '';
 
-			for (const line of lines) {
-				if (line.startsWith('data: ')) {
-					let text = line.slice(6);
-					text = text.replaceAll('[NEWLINE]', '\n');
+			while (true) {
+				const { value, done } = await reader.read();
+				if (done) break;
 
-					if (text === '[DONE]') {
-						return;
+				const chunk = decoder.decode(value, { stream: true });
+				const lines = chunk.split('\n');
+
+				for (const line of lines) {
+					if (line.startsWith('data: ')) {
+						let text = line.slice(6);
+						text = text.replaceAll('[NEWLINE]', '\n');
+
+						if (text === '[DONE]') {
+							return;
+						}
+
+						accumulatedText += text;
+						const html = await marked(accumulatedText);
+						renderedHTML.set(html);
 					}
-
-					accumulatedText += text;
-					const html = await marked(accumulatedText);
-					renderedHTML.set(html);
 				}
 			}
+		} catch (error) {
+			console.error('Error:', error);
+			// @ts-ignore
+			if (error.name === 'TypeError' && error.message.includes('fetch')) {
+				errorMessage.set(
+					'Unable to reach the server. Please check if the URL is correct and the server is running.'
+				);
+			} else {
+				// @ts-ignore
+				errorMessage.set(`Error: ${error.message}`);
+			}
+		} finally {
+			isLoading = false;
 		}
 	}
 </script>
@@ -73,9 +97,65 @@
 		<textarea id="body" bind:value={body} rows="10"></textarea>
 	</div>
 
-	<button type="submit">Send Request</button>
+	{#if $errorMessage}
+		<div class="error-message">
+			{$errorMessage}
+		</div>
+	{/if}
+
+	<button type="submit" disabled={isLoading} class:loading={isLoading}>
+		{#if isLoading}
+			<span class="loader"></span>
+		{/if}
+		{isLoading ? 'Sending...' : 'Send Request'}
+	</button>
 </form>
 
 <article class="card prose">
 	{@html $renderedHTML}
 </article>
+
+<style>
+	.error-message {
+		background-color: #fee2e2;
+		border: 1px solid #ef4444;
+		color: #dc2626;
+		padding: 0.75rem;
+		border-radius: 0.375rem;
+		margin: 1rem 0;
+	}
+
+	button {
+		position: relative;
+	}
+
+	button:disabled {
+		opacity: 0.7;
+		cursor: not-allowed;
+	}
+
+	.loading {
+		padding-left: 2.5rem;
+	}
+
+	.loader {
+		position: absolute;
+		left: 1rem;
+		width: 1rem;
+		height: 1rem;
+		border: 2px solid #ffffff;
+		border-bottom-color: transparent;
+		border-radius: 50%;
+		display: inline-block;
+		animation: rotation 1s linear infinite;
+	}
+
+	@keyframes rotation {
+		0% {
+			transform: rotate(0deg);
+		}
+		100% {
+			transform: rotate(360deg);
+		}
+	}
+</style>

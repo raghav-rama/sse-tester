@@ -2,6 +2,8 @@
 
 A simple web-based tool to test Server-Sent Events (SSE) endpoints.
 
+https://github.com/user-attachments/assets/08c646b4-ec0c-4da2-9030-61420818c897
+
 ## Features
 
 - Test any SSE endpoint with custom JSON payloads

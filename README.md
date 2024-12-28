@@ -1,38 +1,52 @@
-# sv
+# SSE Tester
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+A simple web-based tool to test Server-Sent Events (SSE) endpoints.
 
-## Creating a project
+## Features
 
-If you're seeing this, you've probably already done this step. Congrats!
+- Test any SSE endpoint with custom JSON payloads
+- Real-time markdown rendering of streamed responses
+- Error handling for network issues and invalid responses
+- Visual loading states and feedback
+- Support for streaming markdown content
 
-```bash
-# create a new project in the current directory
-npx sv create
+## Setup
 
-# create a new project in my-app
-npx sv create my-app
-```
-
-## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+1. Clone the repository
+2. Install dependencies:
 
 ```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
 ```
 
-## Building
-
-To create a production version of your app:
+3. Start the development server:
 
 ```bash
-npm run build
+pnpm dev
 ```
 
-You can preview the production build with `npm run preview`.
+## Usage
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+1. Enter your SSE endpoint URL in the input field
+2. Modify the JSON request body as needed
+3. Click "Send Request" to start the stream
+4. The response will be rendered in real-time with markdown support
+
+## Default Configuration
+
+The app comes pre-configured with:
+
+- Default endpoint: `http://localhost:8000/api/v1/chat/completions`
+- Request method: `POST`
+- Headers:
+  - `Content-Type: application/json`
+  - `Accept: text/event-stream`
+
+## Error Handling
+
+The app handles various error scenarios:
+
+- Network connectivity issues
+- Invalid server responses
+- Empty responses
+- HTTP error status codes

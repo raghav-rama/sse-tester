@@ -6,6 +6,14 @@
 	const errorMessage = writable('');
 	let isLoading = false;
 	let url = 'http://localhost:8000/api/v1/chat/completions';
+	let headers = JSON.stringify(
+		{
+			'Content-Type': 'application/json',
+			Accept: 'text/event-stream'
+		},
+		null,
+		2
+	);
 	let body = JSON.stringify(
 		{
 			job_id: '3fa85f64-5717-4562-b3fc-2c963f66afa6',
@@ -23,12 +31,10 @@
 			errorMessage.set('');
 			renderedHTML.set('');
 
+			const customHeaders = JSON.parse(headers);
 			const response = await fetch(url, {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-					Accept: 'text/event-stream'
-				},
+				headers: customHeaders,
 				body
 			});
 
@@ -90,6 +96,11 @@
 			<span class="method-tag">POST</span>
 			<input type="text" id="url" bind:value={url} placeholder="Enter your SSE endpoint URL" />
 		</div>
+	</div>
+
+	<div>
+		<label for="headers">Request Headers (JSON):</label>
+		<textarea id="headers" bind:value={headers} rows="5"></textarea>
 	</div>
 
 	<div>
